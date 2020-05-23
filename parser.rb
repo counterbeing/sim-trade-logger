@@ -26,12 +26,12 @@ File.open('./raw.txt', 'r').each_line do |line|
   data[day].push(matches)
 end
 
-data.each do |key, value|
-  nd = transform_data(value)
+data.each do |_key, value|
+  value = transform_data(value)
   puts nd
   rows = []
-  running_total = 0.0
-  value.each do |entry|
+  daily_total = 0.0
+  value.each do |key, entry|
     row = [
       entry['date'],
       entry['action'],
@@ -40,14 +40,14 @@ data.each do |key, value|
       entry['price']
     ]
     direction = entry['action'] == 'Buy' ? -1 : 1
-    running_total += (entry['amount'].to_i * entry['price'].to_f * direction)
+    daily_total += (entry['amount'].to_i * entry['price'].to_f * direction)
     rows << row
+    table = Terminal::Table.new(
+      title: key,
+      headings: %w[Date Action Symbol Amount Price],
+      rows: rows
+    )
   end
-  table = Terminal::Table.new(
-    title: key,
-    headings: %w[Date Action Symbol Amount Price],
-    rows: rows
-  )
   puts table
-  puts running_total
+  puts daily_total
 end
