@@ -26,28 +26,48 @@ File.open('./raw.txt', 'r').each_line do |line|
   data[day].push(matches)
 end
 
-data.each do |_key, value|
+data.each do |key, value|
   value = transform_data(value)
-  puts nd
-  rows = []
   daily_total = 0.0
-  value.each do |key, entry|
-    row = [
-      entry['date'],
-      entry['action'],
-      entry['symbol'],
-      entry['amount'],
-      entry['price']
-    ]
-    direction = entry['action'] == 'Buy' ? -1 : 1
-    daily_total += (entry['amount'].to_i * entry['price'].to_f * direction)
-    rows << row
+  trade_count = 0
+  value.each do |symbol, entries|
+    symbol_total = 0.0
+    rows = []
+    entries.each do |entry|
+      row = [
+        entry['date'],
+        entry['action'],
+        entry['symbol'],
+        entry['amount'],
+        entry['price']
+      ]
+      direction = entry['action'] == 'Buy' ? -1 : 1
+      symbol_total += (entry['amount'].to_i * entry['price'].to_f * direction)
+      trade_count += 1
+      rows << row
+    end
+    daily_total += symbol_total
+
     table = Terminal::Table.new(
-      title: key,
+      title: "#{symbol} - #{key}",
       headings: %w[Date Action Symbol Amount Price],
       rows: rows
     )
+    puts table
+    puts "P/L: #{symbol_total}"
+    puts ''
   end
-  puts table
-  puts daily_total
+
+  broker_fees = trade_count * 3.00
+  summary_table = Terminal::Table.new(
+    title: "Summary for #{key}",
+    headings: %w[Name Value],
+    rows: [
+      ['Daily Total', daily_total],
+      ['Trade Count', trade_count],
+      ['Broker Fees', broker_fees],
+      ['Total minus fees', daily_total - broker_fees]
+    ]
+  )
+  puts summary_table
 end
