@@ -6,7 +6,9 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import raw from "raw_loader!./raw.txt";
+// import raw from "./raw.txt";
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import raw from "raw-loader!./raw.txt";
 
 @Component
 export default class DayList extends Vue {
